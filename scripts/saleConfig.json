@@ -1,10 +1,10 @@
 {
   "mainnet": {
     "tokenAddress": "0x0000000000000000000000000000000000000000",
-    "totalTokens": " 8333333",
+    "totalTokens": "8333333",
     "tokenPriceUSD": "0.03",
-    "tokenPriceInAvax": "0.0006253",
-    "saleOwner": "0x21b9991d4c2fA47856011c1a9638918c57120F83",
+    "tokenPriceInAvax": "0.0004358",
+    "saleOwner": "0x5207E9D9d1a14839731b06869f98B088e0B8c313",
     "registrationStartAt": 1632754800,
     "registrationLength": 399600,
     "delayBetweenRegistrationAndSale": 172800,
