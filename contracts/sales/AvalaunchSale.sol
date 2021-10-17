@@ -70,7 +70,6 @@ contract AvalaunchSale {
     Sale public sale;
     // Registration
     Registration public registration;
-
     // Number of users participated in the sale.
     uint256 public numberOfParticipants;
     // Array storing IDS of rounds (IDs start from 1, so they can't be mapped as array indexes
@@ -574,6 +573,36 @@ contract AvalaunchSale {
             emit TokensWithdrawn(msg.sender, amountWithdrawing);
         } else {
             revert("Tokens already withdrawn.");
+        }
+    }
+
+    // Expose function where user can withdraw multiple unlocked portions at once.
+    function withdrawMultiplePortions(uint256 [] calldata portionIds) external {
+        uint256 totalToWithdraw = 0;
+
+        for(uint i=0; i < portionIds.length; i++) {
+            uint256 portionId = portionIds[i];
+            require(portionId < vestingPercentPerPortion.length);
+
+            Participation storage p = userToParticipation[msg.sender];
+
+            if (
+                !p.isPortionWithdrawn[portionId] &&
+            vestingPortionsUnlockTime[portionId] <= block.timestamp
+            ) {
+                p.isPortionWithdrawn[portionId] = true;
+                uint256 amountWithdrawing = p
+                .amountBought
+                .mul(vestingPercentPerPortion[portionId])
+                .div(portionVestingPrecision);
+                // Withdraw percent which is unlocked at that portion
+                totalToWithdraw = totalToWithdraw.add(amountWithdrawing);
+            }
+        }
+
+        if(totalToWithdraw > 0) {
+            sale.token.safeTransfer(msg.sender, totalToWithdraw);
+            emit TokensWithdrawn(msg.sender, totalToWithdraw);
         }
     }
 
