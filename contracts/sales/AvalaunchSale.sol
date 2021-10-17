@@ -653,6 +653,11 @@ contract AvalaunchSale {
         registrationFees = 0;
     }
 
+    // Function to act as a fallback and handle receiving AVAX.
+    receive() external payable {
+
+    }
+
     /// @notice     Get current round in progress.
     ///             If 0 is returned, means sale didn't start or it's ended.
     function getCurrentRound() public view returns (uint256) {
