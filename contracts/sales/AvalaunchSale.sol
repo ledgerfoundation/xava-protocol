@@ -244,13 +244,16 @@ contract AvalaunchSale {
         );
     }
 
-    /// @notice     Function to retroactively set sale token address
+    // @notice     Function to retroactively set sale token address, can be called only once,
+    //             after initial contract creation has passed. Added as an options for teams which
+    //             are not having token at the moment of sale launch.
     function setSaleToken(
         address saleToken
     )
     external
     onlyAdmin
     {
+        require(sale.isCreated == true);
         require(address(sale.token) == address(0));
         sale.token = IERC20(saleToken);
     }
