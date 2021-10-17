@@ -616,7 +616,7 @@ contract AvalaunchSale {
     }
 
     /// Function to withdraw all the earnings and the leftover of the sale contract.
-    function withdrawEarningsAndLeftover(bool withBurn) external onlySaleOwner {
+    function withdrawEarningsAndLeftover() external onlySaleOwner {
         // Make sure sale ended
         require(block.timestamp >= sale.saleEnd);
 
@@ -632,13 +632,9 @@ contract AvalaunchSale {
 
         safeTransferAVAX(msg.sender, totalProfit);
 
-        if (leftover > 0 && !withBurn) {
+        if (leftover > 0) {
             sale.token.safeTransfer(msg.sender, leftover);
             return;
-        }
-
-        if (withBurn) {
-            sale.token.safeTransfer(address(1), leftover);
         }
     }
 
