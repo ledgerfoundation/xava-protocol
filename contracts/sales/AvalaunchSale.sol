@@ -600,16 +600,19 @@ contract AvalaunchSale {
         // Increase amount of sold tokens
         sale.totalTokensSold = sale.totalTokensSold.add(amountOfTokensBuying);
         require(sale.totalTokensSold < sale.amountOfTokensToSell, "Require that there is enough tokens to sell.");
+
         // Increase amount of AVAX raised
         sale.totalAVAXRaised = sale.totalAVAXRaised.add(msg.value);
 
-        // Update participation object
+        // Load participation object
         Participation storage p = userToParticipation[msg.sender];
 
+        // Update accounting
         p.amountAVAXPaid = p.amountAVAXPaid.add(msg.value);
         p.amountBought = p.amountBought.add(amountOfTokensBuying);
         p.timeParticipated = block.timestamp;
 
+        // Redistribute XAVA based on their stake.
         allocationStakingContract.redistributeXava(
             0,
             msg.sender,
