@@ -712,6 +712,7 @@ contract AvalaunchSale {
     function withdrawRegistrationFees() external onlyAdmin {
         require(block.timestamp >= sale.saleEnd, "Require that sale has ended.");
         require(registrationFees > 0, "No earnings from registration fees.");
+
         // Transfer AVAX to the admin wallet.
         safeTransferAVAX(msg.sender, registrationFees);
         // Set registration fees to be 0
