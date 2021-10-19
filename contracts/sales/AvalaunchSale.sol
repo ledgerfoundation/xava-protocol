@@ -92,6 +92,8 @@ contract AvalaunchSale {
     uint256 public portionVestingPrecision;
     // Added configurable round ID for staking round
     uint256 public stakingRoundId;
+    // First come first serve round id
+    uint256 public FCFSRoundId;
     // Max vesting time shift
     uint256 public maxVestingTimeShift;
     // Registration deposit AVAX, which will be paid during the registration, and returned back during the participation.
@@ -200,6 +202,7 @@ contract AvalaunchSale {
         uint256 _tokensUnlockTime,
         uint256 _portionVestingPrecision,
         uint256 _stakingRoundId,
+        uint256 _FCFSRoundId,
         uint256 _registrationDepositAVAX
     ) external onlyAdmin {
         require(!sale.isCreated, "setSaleParams: Sale is already created.");
@@ -232,6 +235,8 @@ contract AvalaunchSale {
         portionVestingPrecision = _portionVestingPrecision;
         // Set staking round id
         stakingRoundId = _stakingRoundId;
+        // Set FCFS round id
+        FCFSRoundId = _FCFSRoundId;
         // Mark in factory
         factory.setSaleOwnerAndToken(sale.saleOwner, address(sale.token));
         // Emit event
@@ -337,6 +342,7 @@ contract AvalaunchSale {
             "Registration deposit does not match."
         );
         require(roundId != 0, "Round ID can not be 0.");
+        require(roundId != FCFSRoundId, "FCFS is not accepting direct registrations.");
         require(roundId <= roundIds.length, "Invalid round id");
         require(
             block.timestamp >= registration.registrationTimeStarts &&
@@ -447,32 +453,34 @@ contract AvalaunchSale {
         sale.tokensDeposited = true;
     }
 
-    // Function to participate in the sales
-    function participate(
+    function validateParticipation(
         bytes memory signature,
         uint256 amount,
         uint256 amountXavaToBurn,
-        uint256 roundId
-    ) external payable {
-
+        uint256 roundId,
+        address user
+    )
+    internal
+    {
         require(roundId != 0, "Round can not be 0.");
-
         require(
             amount <= roundIdToRound[roundId].maxParticipation,
             "Overflowing maximal participation for this round."
         );
-
-        // User must have registered for the round in advance
-        require(
-            addressToRoundRegisteredFor[msg.sender] == roundId,
-            "Not registered for this round"
-        );
-
+        if(roundId != FCFSRoundId) {
+            // User must have registered for the round in advance except FCFS
+            require(
+                addressToRoundRegisteredFor[msg.sender] == roundId,
+                "Not registered for this round"
+            );
+            // Check user haven't participated before
+            require(!isParticipated[user], "User can participate only once.");
+        }
         // Verify the signature
         require(
             checkParticipationSignature(
                 signature,
-                msg.sender,
+                user,
                 amount,
                 amountXavaToBurn,
                 roundId
@@ -480,11 +488,8 @@ contract AvalaunchSale {
             "Invalid signature. Verification failed"
         );
 
-        // Check user haven't participated before
-        require(!isParticipated[msg.sender], "User can participate only once.");
-
         // Disallow contract calls.
-        require(msg.sender == tx.origin, "Only direct contract calls.");
+        require(user == tx.origin, "Only direct contract calls.");
 
         // Get current active round
         uint256 currentRound = getCurrentRound();
@@ -494,6 +499,18 @@ contract AvalaunchSale {
             roundId == currentRound,
             "You can not participate in this round."
         );
+    }
+
+
+    // Function to participate in the sales
+    function participate(
+        bytes memory signature,
+        uint256 amount,
+        uint256 amountXavaToBurn,
+        uint256 roundId
+    ) external payable {
+
+        validateParticipation(signature, amount, amountXavaToBurn, roundId, msg.sender);
 
         // Compute the amount of tokens user is buying
         uint256 amountOfTokensBuying = (msg.value).mul(one).div(
@@ -548,6 +565,54 @@ contract AvalaunchSale {
         registrationFees = registrationFees.sub(registrationDepositAVAX);
         // Transfer registration deposit amount in AVAX back to the users.
         safeTransferAVAX(msg.sender, registrationDepositAVAX);
+
+        emit TokensSold(msg.sender, amountOfTokensBuying);
+    }
+
+    // Participate in FirstComeFirstServe round. User can take allocation up to the amount he already took in staking round
+    function participateFCFS(
+        bytes memory signature,
+        uint256 amount,
+        uint256 amountXavaToBurn,
+        uint256 roundId
+    )
+    external
+    payable
+    {
+        validateParticipation(signature, amount, amountXavaToBurn, roundId, msg.sender);
+
+        // Compute the amount of tokens user is buying
+        uint256 amountOfTokensBuying = (msg.value).mul(one).div(
+            sale.tokenPriceInAVAX
+        );
+
+        // Must buy more than 0 tokens
+        require(amountOfTokensBuying > 0, "Can't buy 0 tokens");
+
+        // Check in terms of user allo
+        require(
+            amountOfTokensBuying <= amount,
+            "Trying to buy more than allowed."
+        );
+
+        // Increase amount of sold tokens
+        sale.totalTokensSold = sale.totalTokensSold.add(amountOfTokensBuying);
+
+        // Increase amount of AVAX raised
+        sale.totalAVAXRaised = sale.totalAVAXRaised.add(msg.value);
+
+        // Update participation object
+        Participation storage p = userToParticipation[msg.sender];
+
+        p.amountAVAXPaid = p.amountAVAXPaid.add(msg.value);
+        p.amountBought = p.amountBought.add(amountOfTokensBuying);
+        p.timeParticipated = block.timestamp;
+
+        allocationStakingContract.redistributeXava(
+            0,
+            msg.sender,
+            amountXavaToBurn
+        );
 
         emit TokensSold(msg.sender, amountOfTokensBuying);
     }
