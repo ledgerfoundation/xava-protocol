@@ -511,7 +511,7 @@ contract AvalaunchSale {
     ) external payable {
 
         validateParticipation(signature, amount, amountXavaToBurn, roundId, msg.sender);
-
+        require(roundId != FCFSRoundId);
         // Compute the amount of tokens user is buying
         uint256 amountOfTokensBuying = (msg.value).mul(one).div(
             sale.tokenPriceInAVAX
