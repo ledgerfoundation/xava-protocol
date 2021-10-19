@@ -475,6 +475,10 @@ contract AvalaunchSale {
             );
             // Check user haven't participated before
             require(!isParticipated[user], "User can participate only once.");
+        } else {
+            // For FCFS round id user has to have partcipation in staking round previously.
+            // This is validated on backend.
+            require(isParticipated[user]);
         }
         // Verify the signature
         require(
