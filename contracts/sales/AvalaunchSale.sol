@@ -530,7 +530,6 @@ contract AvalaunchSale {
         // Must buy more than 0 tokens
         require(amountOfTokensBuying > 0, "Can't buy 0 tokens");
 
-        // Check in terms of user allo
         require(
             amountOfTokensBuying <= amount,
             "Trying to buy more than allowed."
@@ -601,7 +600,6 @@ contract AvalaunchSale {
         // Must buy more than 0 tokens
         require(amountOfTokensBuying > 0, "Can't buy 0 tokens");
 
-        // Check in terms of user allo
         require(
             amountOfTokensBuying <= amount,
             "Trying to buy more than allowed."
