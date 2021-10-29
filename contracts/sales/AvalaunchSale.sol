@@ -653,7 +653,7 @@ contract AvalaunchSale {
             sale.token.safeTransfer(msg.sender, amountWithdrawing);
             emit TokensWithdrawn(msg.sender, amountWithdrawing);
         } else {
-            revert("Tokens already withdrawn.");
+            revert("Tokens already withdrawn or portion not unlocked yet.");
         }
     }
 
