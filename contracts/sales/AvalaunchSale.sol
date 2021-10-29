@@ -243,8 +243,6 @@ contract AvalaunchSale {
         stakingRoundId = _stakingRoundId;
         // Set FCFS round id
         FCFSRoundId = _FCFSRoundId;
-        // Mark in factory
-        factory.setSaleOwnerAndToken(sale.saleOwner, address(sale.token));
         // Emit event
         emit SaleCreated(
             sale.saleOwner,
