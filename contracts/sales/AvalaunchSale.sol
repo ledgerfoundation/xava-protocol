@@ -182,8 +182,11 @@ contract AvalaunchSale {
     {
         require(
             timeToShift > 0 && timeToShift < maxVestingTimeShift,
-            "Shift can not be greater than 30 days."
+            "Shift exceeds allowance."
         );
+
+        // Time can be shifted only once.
+        maxVestingTimeShift = 0;
 
         for (uint256 i = 0; i < vestingPortionsUnlockTime.length; i++) {
             vestingPortionsUnlockTime[i] = vestingPortionsUnlockTime[i].add(
