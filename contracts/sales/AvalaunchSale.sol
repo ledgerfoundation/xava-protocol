@@ -84,7 +84,7 @@ contract AvalaunchSale {
     mapping(address => uint256) public addressToRoundRegisteredFor;
     // mapping if user is participated or not
     mapping(address => bool) public isParticipated;
-    // One ether in weis
+    // wei precision
     uint256 public constant one = 10**18;
     // Times when portions are getting unlocked
     uint256[] public vestingPortionsUnlockTime;
