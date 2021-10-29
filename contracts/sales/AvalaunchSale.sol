@@ -537,7 +537,7 @@ contract AvalaunchSale {
 
         // Increase amount of sold tokens
         sale.totalTokensSold = sale.totalTokensSold.add(amountOfTokensBuying);
-        require(sale.totalTokensSold < sale.amountOfTokensToSell, "Require that there is enough tokens to sell.");
+        require(sale.totalTokensSold <= sale.amountOfTokensToSell, "Require that there is enough tokens to sell.");
 
         // Increase amount of AVAX raised
         sale.totalAVAXRaised = sale.totalAVAXRaised.add(msg.value);
