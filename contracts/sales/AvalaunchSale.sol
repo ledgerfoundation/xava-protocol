@@ -140,6 +140,7 @@ contract AvalaunchSale {
         uint256 startTime,
         uint256 maxParticipation
     );
+    event RegistrationAVAXRefunded(address user, uint256 amountRefunded);
 
     // Constructor, always initialized through SalesFactory
     constructor(address _admin, address _allocationStaking) public {
@@ -577,7 +578,8 @@ contract AvalaunchSale {
         registrationFees = registrationFees.sub(registrationDepositAVAX);
         // Transfer registration deposit amount in AVAX back to the users.
         safeTransferAVAX(msg.sender, registrationDepositAVAX);
-
+        // Add event for refunds
+        emit RegistrationAVAXRefunded(msg.sender, registrationDepositAVAX);
         emit TokensSold(msg.sender, amountOfTokensBuying);
     }
 
@@ -752,6 +754,18 @@ contract AvalaunchSale {
         safeTransferAVAX(msg.sender, registrationFees);
         // Set registration fees to be 0
         registrationFees = 0;
+    }
+
+    // Function where admin can withdraw all unused funds.
+    function withdrawUnusedFunds() external onlyAdmin {
+        uint256 balanceAVAX = address(this).balance;
+
+        uint256 totalReservedForRaise = sale.earningsWithdrawn ? 0 : sale.totalAVAXRaised;
+
+        safeTransferAVAX(
+            msg.sender,
+            balanceAVAX.sub(totalRaised.add(registrationFees))
+        );
     }
 
     // Function to act as a fallback and handle receiving AVAX.
