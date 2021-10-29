@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/cryptography/ECDSA.sol";
 import "../interfaces/IAdmin.sol";
 import "../math/SafeMath.sol";
 
-contract AirdropHCT {
+contract Airdrop {
 
     using ECDSA for bytes32;
     using SafeMath for *;
@@ -45,8 +45,8 @@ contract AirdropHCT {
     }
 
     // Get who signed the message based on the params
-    function getSigner(bytes memory signature, address beneficiary, uint256 amount) public pure returns (address) {
-        bytes32 hash = keccak256(abi.encodePacked(beneficiary, amount));
+    function getSigner(bytes memory signature, address beneficiary, uint256 amount) public view returns (address) {
+        bytes32 hash = keccak256(abi.encodePacked(beneficiary, amount, address(this)));
         bytes32 messageHash = hash.toEthSignedMessageHash();
         return messageHash.recover(signature);
     }
