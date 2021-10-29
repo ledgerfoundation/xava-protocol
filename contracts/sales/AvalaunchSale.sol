@@ -661,15 +661,15 @@ contract AvalaunchSale {
     function withdrawMultiplePortions(uint256 [] calldata portionIds) external {
         uint256 totalToWithdraw = 0;
 
+        Participation storage p = userToParticipation[msg.sender];
+
         for(uint i=0; i < portionIds.length; i++) {
             uint256 portionId = portionIds[i];
             require(portionId < vestingPercentPerPortion.length);
 
-            Participation storage p = userToParticipation[msg.sender];
-
             if (
                 !p.isPortionWithdrawn[portionId] &&
-            vestingPortionsUnlockTime[portionId] <= block.timestamp
+                vestingPortionsUnlockTime[portionId] <= block.timestamp
             ) {
                 p.isPortionWithdrawn[portionId] = true;
                 uint256 amountWithdrawing = p
