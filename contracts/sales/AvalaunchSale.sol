@@ -649,9 +649,12 @@ contract AvalaunchSale {
                 .amountBought
                 .mul(vestingPercentPerPortion[portionId])
                 .div(portionVestingPrecision);
+
             // Withdraw percent which is unlocked at that portion
-            sale.token.safeTransfer(msg.sender, amountWithdrawing);
-            emit TokensWithdrawn(msg.sender, amountWithdrawing);
+            if(amountWithdrawing > 0) {
+                sale.token.safeTransfer(msg.sender, amountWithdrawing);
+                emit TokensWithdrawn(msg.sender, amountWithdrawing);
+            }
         } else {
             revert("Tokens already withdrawn or portion not unlocked yet.");
         }
