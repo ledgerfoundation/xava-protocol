@@ -262,7 +262,7 @@ contract AvalaunchSale {
     external
     onlyAdmin
     {
-        require(sale.isCreated == true);
+        require(sale.isCreated);
         require(address(sale.token) == address(0));
         sale.token = IERC20(saleToken);
     }
@@ -273,7 +273,7 @@ contract AvalaunchSale {
         uint256 _registrationTimeStarts,
         uint256 _registrationTimeEnds
     ) external onlyAdmin {
-        require(sale.isCreated == true);
+        require(sale.isCreated);
         require(registration.registrationTimeStarts == 0);
         require(
             _registrationTimeStarts >= block.timestamp &&
@@ -300,7 +300,7 @@ contract AvalaunchSale {
         uint256[] calldata startTimes,
         uint256[] calldata maxParticipations
     ) external onlyAdmin {
-        require(sale.isCreated == true);
+        require(sale.isCreated);
         require(
             startTimes.length == maxParticipations.length,
             "setRounds: Bad input."
