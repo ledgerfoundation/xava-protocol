@@ -448,12 +448,13 @@ contract AvalaunchSale {
             !sale.tokensDeposited, "Deposit can be done only once"
         );
 
+        sale.tokensDeposited = true;
+
         sale.token.safeTransferFrom(
             msg.sender,
             address(this),
             sale.amountOfTokensToSell
         );
-        sale.tokensDeposited = true;
     }
 
     function validateParticipation(
