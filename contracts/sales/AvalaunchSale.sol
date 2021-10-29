@@ -185,7 +185,7 @@ contract AvalaunchSale {
     {
         require(
             timeToShift > 0 && timeToShift < maxVestingTimeShift,
-            "Shift exceeds allowance."
+            "Shift must be nonzero and smaller than maxVestingTimeShift."
         );
 
         // Time can be shifted only once.
