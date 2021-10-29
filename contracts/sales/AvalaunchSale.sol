@@ -25,8 +25,10 @@ contract AvalaunchSale {
         IERC20 token;
         // Is sale created
         bool isCreated;
-        // Are earnings and leftover withdrawn
+        // Are earnings withdrawn
         bool earningsWithdrawn;
+        // Is leftover withdrawn
+        bool leftoverWithdrawn;
         // Have tokens been deposited
         bool tokensDeposited;
         // Address of sale owner
@@ -695,24 +697,49 @@ contract AvalaunchSale {
 
     /// Function to withdraw all the earnings and the leftover of the sale contract.
     function withdrawEarningsAndLeftover() external onlySaleOwner {
+        withdrawEarningsInternal();
+        withdrawLeftoverInternal();
+    }
+
+    // Function to withdraw only earnings
+    function withdrawEarnings() external onlySaleOwner {
+        withdrawEarningsInternal();
+    }
+
+    // Function to withdraw only leftover
+    function withdrawLeftover() external onlySaleOwner {
+        withdrawLeftoverInternal();
+    }
+
+
+    // function to withdraw earnings
+    function withdrawEarningsInternal() internal  {
         // Make sure sale ended
         require(block.timestamp >= sale.saleEnd);
 
         // Make sure owner can't withdraw twice
         require(!sale.earningsWithdrawn);
         sale.earningsWithdrawn = true;
-
         // Earnings amount of the owner in AVAX
         uint256 totalProfit = sale.totalAVAXRaised;
+
+        safeTransferAVAX(msg.sender, totalProfit);
+    }
+
+    // Function to withdraw leftover
+    function withdrawLeftoverInternal() external {
+        // Make sure sale ended
+        require(block.timestamp >= sale.saleEnd);
+
+        // Make sure owner can't withdraw twice
+        require(!sale.leftoverWithdrawn);
+        sale.leftoverWithdrawn = true;
 
         // Amount of tokens which are not sold
         uint256 leftover = sale.amountOfTokensToSell.sub(sale.totalTokensSold);
 
-        safeTransferAVAX(msg.sender, totalProfit);
-
         if (leftover > 0) {
             sale.token.safeTransfer(msg.sender, leftover);
-            return;
         }
     }
 
