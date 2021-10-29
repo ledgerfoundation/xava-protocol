@@ -225,7 +225,7 @@ contract AvalaunchSale {
         );
         require(_portionVestingPrecision >= 100, "Should be at least 100");
         require(_stakingRoundId > 0, "Staking round ID can not be 0.");
-
+        require(_FCFSRoundId > stakingRoundId, "FCFS round has to come after staking round.");
         // Set params
         sale.token = IERC20(_token);
         sale.isCreated = true;
