@@ -728,7 +728,7 @@ contract AvalaunchSale {
     }
 
     // Function to withdraw leftover
-    function withdrawLeftoverInternal() external {
+    function withdrawLeftoverInternal() internal {
         // Make sure sale ended
         require(block.timestamp >= sale.saleEnd);
 
